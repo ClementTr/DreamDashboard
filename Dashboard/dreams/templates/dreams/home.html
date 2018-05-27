@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+
+    <!-- Basic Page Needs
+    ================================================== -->
+    <meta charset="utf-8">
+    <!--[if IE]><meta http-equiv="x-ua-compatible" content="IE=9" /><![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dreams Dashboard</title>
+    <meta name="description" content="dreams">
+    <meta name="keywords" content="dreams">
+    <meta name="author" content="DataDeer">
+
+    <!-- Favicons
+    ================================================== -->
+    <link rel="shortcut icon" href="{% static 'dreams/img/favicon.png' %}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="img/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="img/apple-touch-icon-114x114.png">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css"  href="{% static 'dreams/css/bootstrap.css' %}">
+
+
+    <!-- Stylesheet
+    ================================================== -->
+    <link rel="stylesheet" type="text/css"  href="{% static 'dreams/css/style.css' %}">
+
+
+  </head>
+  <body>
+
+    <!-- Home Page
+    ==========================================-->
+    <div class="text-center">
+        <div class="overlay">
+            <div class="content">
+                <h1>Welcome on <strong><span class="color">Dreams Dashboard !</span></strong></h1>
+                <p class="lead">Closer and closer !</p>
+                <form method = "post" action = "{% url 'home' %}">
+                  {% csrf_token %}
+                  <input class="btn_resume" type="submit" value="Take a Look">
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+  </body>
+</html>

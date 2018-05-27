@@ -1,0 +1,46 @@
+.axis {
+  font: 14px sans-serif;
+}
+
+.line {
+    fill: none;
+    stroke-width: 2px;
+}
+
+.overlay {
+    fill: none;
+    pointer-events: all;
+}
+
+#sales {
+   stroke: crimson;
+}
+
+#deliveries {
+    stroke: #66cdaa
+}
+
+.focus_sales circle {
+    fill: none;
+    stroke: #cd2225;
+}
+
+.focus_sales text {
+    stroke: #cd2225;
+}
+
+.focus_deliveries circle {
+    fill: none;
+    stroke: #37cd33;
+}
+
+.focus_deliveries text {
+    stroke: #37cd33;
+}
+
+
+.hover-line {
+    stroke: #000000;
+    stroke-width: 2px;
+    stroke-dasharray: 3,3;
+}
