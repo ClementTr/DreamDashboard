@@ -1,0 +1,13 @@
+Name,team,gamea,gameb,gamec
+Player 1,b,2000,3000,2000
+Player 2,a,0,0,2000
+Player 3,a,1000,3000,2000
+Player 4,a,0,3000,0
+Player 5,b,1000,3000,0
+Player 6,b,1000,0,2000
+Player 7,b,1000,3000,2000
+Player 8,a,1000,0,0
+Player 9,b,0,4500,0
+Player 10,c,2000,1500,500
+Player 11,c,1000,0,3000
+Player 12,c,500,500,1000
