@@ -31,7 +31,7 @@
                 <div class="au-card m-b-30" style="padding-left: 20px;">
                     <div class="au-card-inner">
                         <h3 class="title-2 m-b-40">Interaction words</h3>
-
+                        <div class="chart-wrapper" id="posneg_second_chart"></div>
                     </div>
                 </div>
             </div>
@@ -44,6 +44,7 @@
                       </div>
                   </div>
               </div>
+
 
           </div>
 
@@ -135,4 +136,7 @@ d3v4.csv("{% static 'dreams/data/coord_2D.csv' %}").row( (d, i) => {
 <script src="http://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.js"></script>
 <script src="{% static 'dreams/js/barChart.js' %}"></script>
+
+<!-- POSNEG CHART -->
+<script src="{% static 'dreams/js/posnegChartSecond.js' %}"></script>
 {% endblock d3js %}

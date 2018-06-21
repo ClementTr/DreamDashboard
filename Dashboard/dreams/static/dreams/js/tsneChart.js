@@ -84,7 +84,7 @@ function handleMouseOver(d, i) {
 }
 
 function handleMouseMove(){
-	return tooltip.style("top", (d3.event.pageY-50)).style("left", (d3.event.pageX+ 20))
+	return tooltip.style("top", (d3v4.event.pageY-50)).style("left", (d3v4.event.pageX+ 20))
 }
 
 function handleMouseOut(){
