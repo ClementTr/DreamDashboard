@@ -184,7 +184,7 @@ svg_posneg_chart.append("g")
 
 
 // Legend
-var legendRectlength = 55;
+var legendRectlength = 60;
 var legendRectheight = 20;
 var legendSpacing = 4;
 
@@ -217,7 +217,7 @@ legend_pos.append('rect')
   }
 })
 var x_legend = d3.scale.linear()
-.range([x_posneg_chart(0) - 35, x_posneg_chart(0) +5 * legendRectlength])
+.range([x_posneg_chart(0) - 31, x_posneg_chart(0) +5 * legendRectlength])
 console.log(x_posneg_chart(0))
 
 var legendAxis_pos = d3.svg.axis()

@@ -279,8 +279,7 @@ section {
 
 .page-container {
     background: #e5e5e5;
-    padding-left: 220px;
-}
+ }
 
 @media (max-width: 991px) {
     .page-container {
@@ -1179,7 +1178,7 @@ section {
     position: fixed;
     top: 0;
     right: 0;
-    left: 220px;
+    left: 0px;
     height: 75px;
     z-index: 3;
 }
@@ -6261,7 +6260,7 @@ section {
 }
 
 .m-b-40 {
-    margin-bottom: 40px;
+    margin-bottom: 15px;
 }
 
 .m-t-40 {
