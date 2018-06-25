@@ -1,32 +1,31 @@
-// Global variables:
 
-var margin_posneg_legend = {top: 20, right: 100, bottom: 40, left: 30}
-var margin_posneg_chart = {top: 20, right: 100, bottom: 40, left: 50},
-width_posneg_chart = document.getElementById("posneg_second_chart").clientWidth - margin_posneg_chart.right
-height_posneg_chart = 180;
+var margin_posneg = {top: 20, right: 30, bottom: 20, left: 30},
+    width_posneg  = 350 - margin_posneg .left - margin_posneg .right,
+    height_posneg  = 80 - margin_posneg .top - margin_posneg .bottom;
 
-var x_posneg_chart = d3.scale.linear()
-.range([0, width_posneg_chart]);
+var x_posneg  = d3.scale.linear()
+    .range([0, width_posneg]);
 
-var y_posneg_chart = d3.scale.ordinal()
-.rangeRoundBands([0, height_posneg_chart], 0.1);
+var y_posneg  = d3.scale.ordinal()
+    .rangeRoundBands([0, height_posneg ], 0.1);
 
-var xAxis_posneg_chart = d3.svg.axis()
-.scale(x_posneg_chart)
-.orient("bottom");
+var xAxis_posneg  = d3.svg.axis()
+    .scale(x_posneg )
+    .orient("bottom")
+    .tickSubdivide(1)
+    .tickSize(0, 0, 0);
 
-var yAxis_posneg_chart = d3.svg.axis()
-.scale(y_posneg_chart)
-.orient("left")
-.tickSize(0)
-.tickPadding(6);
+var yAxis_posneg  = d3.svg.axis()
+    .scale(y_posneg )
+    .orient("left")
+    .tickSize(0)
+    .tickPadding(6);
 
-
-var svg_posneg_chart = d3.select("#posneg_second_chart").append("svg")
-.attr("width", width_posneg_chart + margin_posneg_chart.left + margin_posneg_chart.right)
-.attr("height", height_posneg_chart + margin_posneg_chart.top + margin_posneg_chart.bottom)
+var svg_posneg  = d3.select("#posneg_second_chart").append("svg")
+.attr("width", width_posneg  + margin_posneg .left + margin_posneg .right)
+.attr("height", height_posneg  + margin_posneg .top + margin_posneg .bottom)
 .append("g")
-.attr("transform", "translate(" + margin_posneg_chart.left + "," + margin_posneg_chart.top + ")");
+.attr("transform", "translate(" + margin_posneg .left + "," + margin_posneg .top + ")");
 
 let positives = 0;
 let negatives = 0;
@@ -50,11 +49,8 @@ var negative_corpus = '';
 var neutral_corpus = '';
 
 
-
-
-
 // Variable envoyée par le code Rastel
-var posneg = [8, 40, 153, 730, 5239, 888, 8109, 1585, 299, 47, 14];
+var posneg = [7, 21, 43, 89, 123, 21, 199, 120, 31, 20, 1];
 // Get total count
 var total_count = 0;
 for (var i = 0; i < posneg.length; i++){
@@ -67,6 +63,10 @@ for (var i = 0; i < posneg.length; i++){
 };
 var total_ticks = ['Extremely negative', 'Very negative', 'Negative', 'Quite negative','Rather negative',
 'Neutral', 'Rather positive', 'Quite positive', 'Positive', 'Very positive', 'Extremely positive']
+// var total_ticks_legend = ['Extremely negative', 'Very negative', 'Negative', 'Quite negative','Rather negative',
+//     'Rather positive', 'Quite positive', 'Positive', 'Very positive', 'Extremely positive']
+var total_ticks_legend = ['Extremely negative', 'Very negative', 'Negative', 'Quite negative','Rather negative',
+     'Rather positive', 'Quite positive', 'Positive', 'Very positive', 'Extremely positive']
 var pos_ticks = ['Rather positive', 'Quite positive', 'Positive', 'Very positive', 'Extremely positive'];
 var neg_ticks = ['Rather negative', 'Quite negative', 'Negative', 'Very negative', 'Extremely negative'];
 
@@ -94,198 +94,174 @@ for (var i = 0; i < posneg.length; i++){
       "range_count": posneg[i]})
   }
 };
-console.log(total_data)
+
 // Domain of x axis
-x_posneg_chart.domain([0, 100]);
+x_posneg .domain([-100, 100]);
 
-// Domain of y axis
-y_posneg_chart.domain(total_data.map(function(total_data) { return total_data.name; }));
+//x.domain(d3.extent(total_data, function(total_data) { return total_data.value; })).nice();
+y_posneg .domain(total_data.map(function(total_data) { return ''; }));
+//y.domain([0, 0]);
+var neutral_value = total_data[5].value / 2
 
-// Create rectangles
-svg_posneg_chart.selectAll("rect")
-.data(total_data)
-.enter()
-.append("rect")
-.attr("class", function(d) { return "bar bar--" + (d.value < 0 ? "negative" : "positive"); })
+svg_posneg.selectAll("rect")
+  .data(total_data)
+  .enter()
+  .append("rect")
+  .attr("class", function(d) { return "bar bar--" + (d.value < 0 ? "negative" : "positive"); })
+  .attr("x", function(d) {
 
-//x depend on polarity class
-.attr("x", function(d) {
+    if(d.name == 'positive'){
+      let pos_width2 = pos_width
+      pos_width = pos_width + d.value
+      //console.log(d.value)
+      //console.log(pos_width2)
+      //console.log(x(pos_width2))
+      return x_posneg(pos_width2 + neutral_value)
+      //x(Math.min(0, d.value))
+    } else if (d.name == 'negative') {
+      let neg_width2 = neg_width
+      neg_width = neg_width + d.value
+      return x_posneg(-neg_width - neutral_value)
 
-  if(d.name == 'positive'){
-    let pos_width2 = pos_width
-    pos_width = pos_width + d.value
-    return x_posneg_chart(pos_width2)
-  } else if (d.name == 'negative') {
-    let neg_width2 = neg_width
-    neg_width = neg_width + d.value
-
-    return x_posneg_chart(neg_width2)
-
-  } else {
-    return x_posneg_chart(0)
-  };
-})
-.attr("y", function(d) { return y_posneg_chart(d.name);})
-.attr("width", function(d) { return Math.abs(x_posneg_chart(d.value) - x_posneg_chart(0));  })
-.attr("height", y_posneg_chart.rangeBand())
-
-// color depend on polarity
-.attr("fill", function(d) {
-  if(d.name == 'positive'){
-    current_pos_col_idx = current_pos_col_idx + 1
-    return pos_colors[current_pos_col_idx]
-  }
-  else if(d.name == 'negative') {
-    current_neg_col_idx = current_neg_col_idx + 1
-    return neg_colors[current_neg_col_idx]
-  } else {
-    return '#c6c6c6'
-  }
-})
+    } else {
+      return x_posneg( - d.value / 2)
+    };
+  })
+  .attr("y", 5)
+  .attr("width", function(d) { return Math.abs(x_posneg (d.value) - x_posneg (0));  })
+  .attr("height", 30)
+  .attr("fill", function(d) {
+    if(d.name == 'positive'){
+      current_pos_col_idx = current_pos_col_idx + 1
+      return pos_colors[current_pos_col_idx]
+    }
+    else if(d.name == 'negative') {
+      current_neg_col_idx = current_neg_col_idx + 1
+      return neg_colors[current_neg_col_idx]
+    } else {
+      return '#c6c6c6'
+    }
+  })
 .on("mouseover", function(d){
   if(showing == false){
     d3.select(this)//.style("fill", "rgba(145, 0, 0, 0.4)")
     if(d.name == 'positive'){
-      return tooltip.style("visibility", "visible")
+      return tooltip_posneg.style("visibility", "visible")
       .html("<b>Total " + d.name + " count:</b> " + d.whole_count + ' ('+Math.round(d.whole_count / total_count * 100)+'%)'
       + "<br/><b>" +
       d.range + ' : </b>' + d.range_count +' (' + Math.round(d.range_count / d.whole_count * 100) + '% of all positives)')
     } else if (d.name =='negative') {
-      return tooltip.style("visibility", "visible")
+      return tooltip_posneg.style("visibility", "visible")
       .html("<b>Total " + d.name + " count:</b> " + Math.abs(d.whole_count) + ' ('+Math.round(Math.abs(d.whole_count) / total_count * 100)+'%)'
       + "<br/><b>" +
       d.range + ' : </b>' + Math.abs(d.range_count) +' (' + Math.round(Math.abs(d.range_count) / Math.abs(d.whole_count) * 100) + '% of all negatives)')
     } else {
-      return tooltip.style("visibility", "visible").html("<b>Total neutrals count: </b>" + d.whole_count + ' (' + Math.round(d.whole_count/total_count*100) + '%)')
+      return tooltip_posneg.style("visibility", "visible").html("<b>Total neutrals count: </b>" + d.whole_count + ' (' + Math.round(d.whole_count/total_count*100) + '%)')
     }
 
 
   };
 })
 .on("mousemove", function() {
-  return tooltip.style("top", (d3.event.pageY)+"px")
+  return tooltip_posneg.style("top", (d3.event.pageY)+"px")
   .style("left",(d3.event.pageX+10)+"px");
 })
 .on("mouseout", function() {
   d3.select(this)
-  return tooltip.style("visibility", "hidden").text('');
+  return tooltip_posneg.style("visibility", "hidden").text('');
 });
 
-// adding axis X and Y
-svg_posneg_chart.append("g")
-.attr("class", "x axis")
-.attr("transform", "translate(0," + height_posneg_chart + ")")
-.call(xAxis_posneg_chart);
-
-svg_posneg_chart.append("g")
-.attr("class", "y axis")
-.attr("transform", "translate(" + x_posneg_chart(0) + ",0)")
-.call(yAxis_posneg_chart);
+svg_posneg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height_posneg  + ")")
+    .call(xAxis_posneg )
+    .style("opacity", 0)
+    .selectAll("text").remove();
+svg_posneg.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(" + x_posneg(0) + ",0)")
+    .call(yAxis_posneg);
 
 
 // Legend
 var legendRectlength = 60;
-var legendRectheight = 20;
+var legendRectheight = 10;
 var legendSpacing = 4;
 
+var legends = d3.select("#posneg_second_chart").append("svg")
+  .attr("width", width_posneg + margin_posneg.left + margin_posneg.right)
+  .attr("height",25)
+  .append("g")
+  .attr("transform", "translate(" + margin_posneg.left + "," + 0 + ")");
 
-// Legend for positive:
-var legends_pos = d3.select("#posneg_second_chart").append("svg")
-.attr("width", 350)//width + margin.left + margin.right - 110
-.attr("height", 50)
-.append("g")
-.attr("transform", "translate(" + margin_posneg_legend.left + "," + 0 + ")");
-
-var legend_pos = legends_pos.selectAll('.legend')
+var legend_pos = legends.selectAll('.legend')
 .data(total_data.filter(function(d){ return d.name == 'positive'; }))
 .enter()
 .append('g')
 .attr('class', 'legend_pos');
 
 legend_pos.append('rect')
-.attr('x', function(){
-  temp1 += legendRectlength;
-  return(x_posneg_chart(0) + temp1)
-})
-.attr('y', 0)
-.attr('width', legendRectlength)
-.attr('height', legendRectheight)
+  .attr('x', function(){
+    temp1 += legendRectlength;
+    return(x_posneg(0) + temp1)
+  })
+  .attr('y', 0)
+  .attr('width', legendRectlength)
+  .attr('height', legendRectheight)
 
-.style('fill', function(d, i){
-  if(d.name == 'positive'){
-    return pos_colors[i]
-  }
-})
-var x_legend = d3.scale.linear()
-.range([x_posneg_chart(0) - 31, x_posneg_chart(0) +5 * legendRectlength])
-console.log(x_posneg_chart(0))
+  //.style('stroke-width', 2)
+  .style('fill', function(d, i){
+    if(d.name == 'positive'){
+      return pos_colors[i]
+    }
+  })
 
-var legendAxis_pos = d3.svg.axis()
-.scale(x_legend)
-.orient("bottom")
-.ticks(5)
-.tickSubdivide(1)
-.tickSize(0, 0, 0)
-.tickFormat(function(d, i){ return pos_ticks[i] });
+var legend_neg = legends.selectAll('.legend')
 
-legends_pos.append("g")
-.attr("class", "axisLegend2")
-.attr("transform", "translate(" + legendRectlength / 2 + "," + legendRectheight + ")")
-.call(legendAxis_pos)
-.style("color", 'white');
+    .data(total_data.filter(function(d){ return d.name == 'negative'; }))
+    .enter()
+    .append('g')
+    .attr('class', 'legend_neg')
 
-legends_pos.selectAll('.tick').style('color', 'black');
+    legend_neg.append('rect')
+      .attr('x', function() {
+        temp2 += legendRectlength
+        return (x_posneg(0) + temp2) - 5 * legendRectlength;
+      })
+      .attr('y', 0)
+      .attr('width', legendRectlength)
+      .attr('height', legendRectheight)
+      .style('stroke-width', 2)
+      .style('fill', function(d, i){
+        if(d.name == 'negative'){
+          //console.log(neg_colors[i])
+          return neg_colors[4 - i]
+        }
+      });
 
+  var x_legend = d3.scale.linear()
+      .range([x_posneg(0) - 5 * legendRectlength + legendRectlength/2, x_posneg(0) + 5 * legendRectlength + + legendRectlength/2])
 
-// Legend for negative
-var legends_neg = d3.select("#posneg_second_chart").append("svg")
-.attr("width", 350)
-.attr("height",50)
-.append("g")
-.attr("transform", "translate(" + margin_posneg_legend.left + "," + 0 + ")");
+  var legendAxis = d3.svg.axis()
+      .scale(x_legend)
+      .orient("bottom")
+      .ticks(10)
+      .tickSubdivide(1)
+      .tickSize(0, 0, 0)
+      .tickFormat(function(d, i){ return total_ticks_legend[i] });
 
-var legend_neg = legends_neg.selectAll('.legend')
+  x_legend.domain([-1.0, 1.0]);
 
-.data(total_data.filter(function(d){ return d.name == 'negative'; }))
-.enter()
-.append('g')
-.attr('class', 'legend_neg')
+  legends.append("g")
+      .attr("class", "axisLegend")
+      .attr("transform", "translate(" + 0 + "," + legendRectheight + ")")
+      .call(legendAxis)
+      .style("color", 'white');
 
-legend_neg.append('rect')
-.attr('x', function() {
-  temp2 += legendRectlength
-  return (x_posneg_chart(0) + temp2);
-})
-//.attr('y', 40)
-.attr('width', legendRectlength)
-.attr('height', 20)
-.style('stroke-width', 2)
-.style('fill', function(d, i){
-  if(d.name == 'negative'){
-    //console.log(neg_colors[i])
-    return neg_colors[i]
-  }
-});
-
-var legendAxis_neg = d3.svg.axis()
-.scale(x_legend)
-.orient("bottom")
-.ticks(5)
-.tickSubdivide(1)
-.tickSize(0, 0, 0)
-.tickFormat(function(d, i){ return neg_ticks[i] });
-legends_neg.append("g")
-.attr("class", "axisLegend2")
-.attr("transform", "translate(" + legendRectlength / 2 + "," + legendRectheight + ")")
-.call(legendAxis_neg)
-.style("color", 'white');
-
-legends_neg.selectAll('.tick').style('color', 'black');
-
-x_legend.domain([0, 1.0]);
+  legends.selectAll('.tick').style('color', 'black');
 
 
-var tooltip = d3.select("body")
+var tooltip_posneg = d3.select("#posneg_second_chart")
         .append("div")
         .style("position", "absolute")
         .style("z-index", "10")

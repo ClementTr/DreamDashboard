@@ -2,6 +2,31 @@
 {% load static %}
 
 {% block main %}
+<style>
+.toolTip {
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  border: 1px solid #6F257F;
+  padding: 14px;
+  text-align: center;
+}
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 0px;
+  height: 0px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: #E5E5E5;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+</style>
 <div class="main-content">
     <div class="section__content section__content--p30">
         <div class="container-fluid">
@@ -26,11 +51,22 @@
                 <div class="col-sm-12" style=" padding-left: 0px; padding-right: 0px;">
                   <div class="au-card m-b-30" style="padding-left: 20px;padding-bottom: 0px;padding-top: 15px;">
                       <div class="au-card-inner">
-                          <h3 class="title-2 m-b-40">Interaction words</h3>
+                          <h3 class="title-2 m-b-40" style="margin-bottom: 0px;">Interaction words</h3>
                           <div class="chart-wrapper" id="bar_chart"></div>
                       </div>
                   </div>
                 </div>
+
+                <div class="col-sm-12" style=" padding-left: 0px; padding-right: 0px;">
+                  <div class="au-card m-b-30" style="padding-left: 20px;padding-bottom: 0px;padding-top: 15px;">
+                      <div class="au-card-inner">
+                          <h3 class="title-2 m-b-40">Interaction words</h3>
+                          <center>
+                          <div class="chart-wrapper" id="tsne_chart"></div>
+                          </center>
+                      </div>
+                  </div>
+              </div>
 
                 <div class="col-sm-12" style=" padding-left: 0px; padding-right: 0px;">
                   <div class="au-card m-b-30" style="padding-left: 20px;padding-bottom: 0px;padding-top: 15px;">
@@ -43,16 +79,8 @@
 
               </div>
 
-              <div class="col-sm-12">
-                <div class="au-card m-b-30" style="padding-left: 20px;">
-                    <div class="au-card-inner">
-                        <h3 class="title-2 m-b-40">Interaction words</h3>
-                        <center>
-                        <div class="chart-wrapper" id="tsne_chart"></div>
-                      </center>
-                    </div>
-                </div>
             </div>
+
 
 
         </div>
@@ -65,75 +93,84 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="{% static 'dreams/js/tsneChart.js' %}"></script>
 <script>
-// AJOUTER LEGENDE COULEUR
-  let d3v4 = d3
-	const w = 300;
-	const h = 300;
-	const leg_w = 150;
-	const leg_h = 100;
-	let x;
-	let y;
-	let dataset = [];
-	let on_word;
+let d3v4 = d3
+const w = 200;
+const h = 200;
+const leg_w = 150;
+const leg_h = 150;
+let x;
+let y;
+let dataset = [];
+let on_word;
 
-	// Append SVG
-	let svg = d3v4.select("#tsne_chart")
-				.append("svg")
-				.attr("width", w)
-				.attr("height", h)
-				.call(d3v4.zoom().on("zoom", function () {
-    			svg.attr("transform", d3v4.event.transform)
-	 			}))
-				.append("g");
+// Append SVG
+let svg = d3v4.select("#tsne_chart")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h)
+      .call(d3v4.zoom().on("zoom", function () {
+        svg.attr("transform", d3v4.event.transform)
+      }))
+      .append("g");
 
 var tabeau_legendes = [{'type' : "Verb", 'color' : "#c300ff"},
- 									 		{'type' : "Noun", 'color' : "#009b31"},
-											{'type' : "Adverb", 'color' : "#ff0000"},
-											{'type' : "Other", 'color' : "#f4df41"},
-											{'type' : "Adjective", 'color' : "#0008ff"}]
+          {'type' : "Noun", 'color' : "#009b31"},
+          {'type' : "Adverb", 'color' : "#ff0000"},
+          {'type' : "Other", 'color' : "#f4df41"},
+          {'type' : "Adjective", 'color' : "#0008ff"},
+          {'type' : "Proper Noun", 'color' : "#702e2e"}]
 
-var tooltip = d3v4.select("#tsne_chart")
-			    .append("div")
-			    .style("position", "absolute")
-			    .style("z-index", "10")
-			    .style("visibility", "hidden")
-			    .style("opacity", "0.8")
-			    .style("padding","10px")
-			    .style("border-radius","2px")
-			    .style("background-color", "black")
-					.style("color", "white");
+// var tooltip = d3v4.select("#tsne_chart")
+//         .append("div")
+//         .style("position", "absolute")
+//         .style("z-index", "10")
+//         .style("visibility", "hidden")
+//         .style("opacity", "0.8")
+//         .style("padding","10px")
+//         .style("border-radius","2px")
+//         .style("background-color", "black")
+//         .style("color", "white");
+
+let tooltip_tsne = d3v4.select("#tsne_chart").append("div").attr("class", "toolTip");
+
+let div_popup = d3v4.select("body")
+                  .append("div")
+                  .attr("id", "popup_pitch")
+                  .attr("class", "tooltip")
+                  .style("opacity", 0);
 
 // Loading csv file
 d3v4.csv("{% static 'dreams/data/coord_2D.csv' %}").row( (d, i) => {
-		  return {
-		    word : d.word,
-				tag : d.tag,
-		    x_coord : +d.x_coord,
-		    y_coord : +d.y_coord,
-		    //z_coord : +d.z_coord,
-				count : +d.count,
-				frequence : +d.frequence,
-				opacity : +d.opacity
-		  };
-		})
-		.get((error, rows) => {
-			console.log("Loaded " + rows.length + " words");
-		  console.log(rows[0]);
-		  console.log(rows[20]);
+    return {
+        word : d.word,
+      tag : d.tag,
+        x_coord : +d.x_coord,
+        y_coord : +d.y_coord,
+        //z_coord : +d.z_coord,
+      count : +d.count,
+      frequence : +d.frequence,
+      opacity : +d.opacity
+    };
+  })
+  .get((error, rows) => {
+    console.log("Loaded " + rows.length + " words");
+    console.log(rows[0]);
+    console.log(rows[20]);
 
-		 dataset = rows;
+   dataset = rows;
 
-			x = d3v4.scaleLinear()
-			      .domain(d3v4.extent(rows,(row) => row.x_coord))
-			      .range([0, w]);
+    x = d3v4.scaleLinear()
+          .domain(d3v4.extent(rows,(row) => row.x_coord))
+          .range([0, w]);
 
-			y = d3v4.scaleLinear()
-			      .domain(d3v4.extent(rows,(row) => row.y_coord))
-			      .range([0, h]);
+    y = d3v4.scaleLinear()
+          .domain(d3v4.extent(rows,(row) => row.y_coord))
+          .range([0, h]);
 
-		  	draw();
-				draw_legend();
-		});
+      draw();
+      draw_legend();
+});
+
 </script>
 
 
@@ -141,6 +178,7 @@ d3v4.csv("{% static 'dreams/data/coord_2D.csv' %}").row( (d, i) => {
 <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.js"></script>
+
 <script src="{% static 'dreams/js/barChart.js' %}"></script>
 
 <!-- POSNEG CHART -->

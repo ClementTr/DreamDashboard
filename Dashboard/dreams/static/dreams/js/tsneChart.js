@@ -1,4 +1,5 @@
 function draw() {
+
 	svg.append("g")
 	 .selectAll("circle")
 	 .data(dataset)
@@ -6,19 +7,20 @@ function draw() {
 	 .append("circle")
 	 .attr("cx",(d) => x(d.x_coord))
 	 .attr("cy",(d) => y(d.y_coord))
-	 .attr("r", make_word_bigger)
-	 .style("opacity", (d) => (d.opacity))
+	 .attr("r", (d) => (d.opacity * 2 - 0.2) )
+	 .style("opacity", 1)//(d) => (d.opacity))
 	 .style("fill", set_color)
 	 .on("mouseover", handleMouseOver)
-	 .on("mousemove", handleMouseMove)
+	 .on("mousemove",  function(d) {return handleMouseMove(d3v4.event.pageX, d3v4.event.pageY, d.word,  d.tag, d.count, d.frequence)})
 	 .on("mouseout", handleMouseOut);
-	}
+}
+
 
 function draw_legend() {
 	var leg_svg = d3v4.select("#tsne_chart")
 									.append('svg')
-									.attr("width", leg_w)
-									.attr("height", leg_h)
+									.attr("width", leg_w + 500)
+									.attr("height", 35)
 									.append("g")
 									.attr("transform", "translate(0,0)");
 
@@ -29,8 +31,22 @@ function draw_legend() {
 				.style("font-family", "sans-serif");
 
 	legend.append("circle")
-				.attr("cx",10)
-				.attr("cy",function(d, i) { return 10 + i * 20; })
+				.attr("cx", function(d, i) {
+					if(i<3){
+						return 10 + i * 100;
+					}
+					else{
+						return 10 + (i-3) * 100;
+					}
+				})
+				.attr("cy", function(d, i) {
+					if(i<3){
+						return 10;
+					}
+					else{
+						return 25;
+					}
+				})
 				.attr("r", 4)
 				.style("opacity", 0.6)
 				.style("fill", function(d, i) { return d.color; })
@@ -38,61 +54,81 @@ function draw_legend() {
 				.on("mouseout", handleMouseOut_legend);
 
 	legend.append("text")
-			.attr("x", 20)
-			.attr("dy", function(d, i) { return 15 + i * 20; })
+				.attr("x", function(d, i) {
+					if(i<3){
+						return 15 + i * 100;
+					}
+					else{
+						return 15 + (i-3) * 100;
+					}
+				})
+				.attr("dy", function(d, i) {
+					if(i<3){
+						return 15;
+					}
+					else{
+						return 30;
+					}
+				})
 			.text(function(d, i) { return d.type; })
 			.style("opacity", 1)
 			.on("mouseover", handleMouseOver_legend)
 			.on("mouseout", handleMouseOut_legend);
 
-/*	legend.on("click", function(type){
-		d3.selectAll(".legend")
-            .style("opacity", 0.2);
-		d3.select(this)
-		        .style("opacity", 1);
-	})
-*/
 }
 
 function handleMouseOver_legend(d, i) {
 	d3v4.select(this)
 		.transition()
-    .duration(500)
-    .attr('r',6)
+		.duration(100)
+    .attr('r', 2)
 		.style("opacity", 1)
 }
 
 function handleMouseOut_legend(){
 	d3v4.select(this)
 		.transition()
-    .duration(500)
-    .attr('r',4)
+    .duration(100)
+    .attr('r', 1)
 		.style("opacity", 0.8)
 }
 
 function handleMouseOver(d, i) {
-	d3v4.select(this)
-		.transition()
-    .duration(500)
-    .attr('r',6)
+	// d3v4.select(this)
+	// 	.transition()
+  //   .duration(100)
+  //   .attr('r', 2)
+	// 	.attr("width", 8)
+	// 	.attr('height', 8)
 
-	return tooltip.style("visibility", "visible")
+	return tooltip_tsne.style("visibility", "visible")
 										.html(d.word + "<br/><b>"
 										+ "Pos tag : " + d.tag + "<br/><b>"
 										+ "Occurence in dreams : " + d.count + "<br/><b>"
 									  + "Frequence in dreams : " + d.frequence).style("color", "white")
 }
 
-function handleMouseMove(){
-	return tooltip.style("top", (d3v4.event.pageY-50)).style("left", (d3v4.event.pageX+ 20))
+function handleMouseMove(x, y, word, postag, count, frequence){
+	div_popup.transition()
+					 .duration(50)
+					 .style("width", "100px")
+					 .style("height", "50px")
+					 .style("opacity", .9);
+	div_popup.html(word + "<br/><b>Tag:</b> " + postag + "<br/><b>Count</b>: " + count)
+					 .style("left", x + "px")
+					 .style("top", y + "px");
 }
 
 function handleMouseOut(){
-	d3v4.select(this)
-		.transition()
-    .duration(500)
-    .attr('r',2)
-	return tooltip.style("visibility", "hidden")
+	// d3v4.select(this)
+	// 	.transition()
+  //   .duration(100)
+  //   .attr('r', 2);
+
+	div_popup.transition()
+					 .duration(500)
+					 .style("height", 0)
+					 .style("opacity", 0);
 }
 
 function make_word_bigger (d) {
@@ -109,12 +145,14 @@ function set_color (d){
     if (d.tag == "Noun") {
       return "#009b31"; // green
     } else if (d.tag == "Verb") {
-      return "#c300ff"; // purple
+      return "#392759"; // purple
     } else if (d.tag == "Adverb"){
-			return "#ff0000"; // rouge
+			return "A63446"; // rouge
 		} else if (d.tag == "Adjective"){
-			return "#0008ff"; // blue
+			return "#6874E8"; // blue
 		} else if (d.tag == "Other"){
-			return "#f4df41"
+			return "F7ACCF"
+		} else if (d.tag == "Proper Noun"){
+			return "#702e2e" // Proper
 		}
 }

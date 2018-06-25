@@ -306,7 +306,7 @@ section {
 }
 
 .main-content {
-    padding-top: 90px;
+    padding-top: 10px;
     min-height: 100vh;
 }
 
@@ -14656,7 +14656,7 @@ polyline{
 
 /* In biology we generally italicise species names. */
 .labelName {
-    font-size: 0.5em;
+    font-size: 0.8em;
     font-style: italic;
 }
 
@@ -14725,4 +14725,10 @@ font: 7px sans-serif
 .node--root,
 .node--leaf {
   pointer-events: none;
+}
+
+
+#container_map svg {
+  left: 0px;
+  top: 0px;
 }

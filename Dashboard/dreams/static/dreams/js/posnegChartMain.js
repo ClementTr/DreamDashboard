@@ -1,8 +1,8 @@
 // Global variables:
 
-var margin = {top: 20, right: 100, bottom: 40, left: 50},
+var margin = {top: 20, right: 100, bottom: 40, left: 60},
 width = document.getElementById("posneg_chart").clientWidth - margin.right
-height = 180;
+height = 159;
 
 var x = d3.scale.linear()
 .range([0, width]);
@@ -64,7 +64,7 @@ for (var i = 0; i < posneg.length; i++){
     positives += posneg[i]
   }
 };
-var total_ticks = ['Extremely negative', 'Very negative', 'Negative', 'Quite negative','Rather negative',
+var total_ticks = ['Extremely night', 'Very negative', 'Negative', 'Quite negative','Rather negative',
 'Neutral', 'Rather positive', 'Quite positive', 'Positive', 'Very positive', 'Extremely positive']
 var pos_ticks = ['Rather positive', 'Quite positive', 'Positive', 'Very positive', 'Extremely positive'];
 var neg_ticks = ['Rather negative', 'Quite negative', 'Negative', 'Very negative', 'Extremely negative'];
@@ -73,20 +73,20 @@ var neg_ticks = ['Rather negative', 'Quite negative', 'Negative', 'Very negative
 var total_data = [];
 for (var i = 0; i < posneg.length; i++){
   if(i <= 4){
-    total_data.push({ "name": "negative",
+    total_data.push({ "name": "Nightmare",
       "value": (posneg[(4-i)] / total_count) * 100,
       "whole_count": negatives,
       "range": total_ticks[(4-i)],
       "range_count": posneg[(4-i)]})
 
   } else if (i == 5) {
-    total_data.push({ "name": "neutral",
+    total_data.push({ "name": "Neutral",
       "value": (posneg[i] / total_count) * 100,
       "whole_count": posneg[i],
       "range": total_ticks[i],
       "range_count": posneg[i]})
   } else{
-    total_data.push({ "name": "positive",
+    total_data.push({ "name": "Dream",
       "value": (posneg[i] / total_count) * 100,
       "whole_count": positives,
       "range": total_ticks[i],
@@ -95,7 +95,7 @@ for (var i = 0; i < posneg.length; i++){
 };
 console.log(total_data)
 // Domain of x axis
-x.domain([0, 100]);
+x.domain([0, 65]);
 
 // Domain of y axis
 y.domain(total_data.map(function(total_data) { return total_data.name; }));
@@ -105,16 +105,16 @@ svg.selectAll("rect")
 .data(total_data)
 .enter()
 .append("rect")
-.attr("class", function(d) { return "bar bar--" + (d.value < 0 ? "negative" : "positive"); })
+.attr("class", function(d) { return "bar bar--" + (d.value < 0 ? "Nightmare" : "Dream"); })
 
 //x depend on polarity class
 .attr("x", function(d) {
 
-  if(d.name == 'positive'){
+  if(d.name == 'Dream'){
     let pos_width2 = pos_width
     pos_width = pos_width + d.value
     return x(pos_width2)
-  } else if (d.name == 'negative') {
+  } else if (d.name == 'Nightmare') {
     let neg_width2 = neg_width
     neg_width = neg_width + d.value
 
@@ -124,17 +124,17 @@ svg.selectAll("rect")
     return x(0)
   };
 })
-.attr("y", function(d) { return y(d.name);})
+.attr("y", function(d) { return y(d.name) + 10;})
 .attr("width", function(d) { return Math.abs(x(d.value) - x(0));  })
-.attr("height", y.rangeBand())
+.attr("height", y.rangeBand()-20)
 
 // color depend on polarity
 .attr("fill", function(d) {
-  if(d.name == 'positive'){
+  if(d.name == 'Dream'){
     current_pos_col_idx = current_pos_col_idx + 1
     return pos_colors[current_pos_col_idx]
   }
-  else if(d.name == 'negative') {
+  else if(d.name == 'Nightmare') {
     current_neg_col_idx = current_neg_col_idx + 1
     return neg_colors[current_neg_col_idx]
   } else {
@@ -144,16 +144,16 @@ svg.selectAll("rect")
 .on("mouseover", function(d){
   if(showing == false){
     d3.select(this)//.style("fill", "rgba(145, 0, 0, 0.4)")
-    if(d.name == 'positive'){
+    if(d.name == 'Dream'){
       return tooltip.style("visibility", "visible")
       .html("<b>Total " + d.name + " count:</b> " + d.whole_count + ' ('+Math.round(d.whole_count / total_count * 100)+'%)'
       + "<br/><b>" +
-      d.range + ' : </b>' + d.range_count +' (' + Math.round(d.range_count / d.whole_count * 100) + '% of all positives)')
-    } else if (d.name =='negative') {
+      d.range + ' : </b>' + d.range_count +' (' + Math.round(d.range_count / d.whole_count * 100) + '% of all dreams)')
+    } else if (d.name =='Nightmare') {
       return tooltip.style("visibility", "visible")
       .html("<b>Total " + d.name + " count:</b> " + Math.abs(d.whole_count) + ' ('+Math.round(Math.abs(d.whole_count) / total_count * 100)+'%)'
       + "<br/><b>" +
-      d.range + ' : </b>' + Math.abs(d.range_count) +' (' + Math.round(Math.abs(d.range_count) / Math.abs(d.whole_count) * 100) + '% of all negatives)')
+      d.range + ' : </b>' + Math.abs(d.range_count) +' (' + Math.round(Math.abs(d.range_count) / Math.abs(d.whole_count) * 100) + '% of all nightmares)')
     } else {
       return tooltip.style("visibility", "visible").html("<b>Total neutrals count: </b>" + d.whole_count + ' (' + Math.round(d.whole_count/total_count*100) + '%)')
     }
@@ -191,12 +191,12 @@ var legendSpacing = 4;
 // Legend for positive:
 var legends_pos = d3.select("#posneg_chart").append("svg")
 .attr("width", 450)//width + margin.left + margin.right - 110
-.attr("height",50)
+.attr("height",35)
 .append("g")
 .attr("transform", "translate(" + margin.left + "," + 0 + ")");
 
 var legend_pos = legends_pos.selectAll('.legend')
-.data(total_data.filter(function(d){ return d.name == 'positive'; }))
+.data(total_data.filter(function(d){ return d.name == 'Dream'; }))
 .enter()
 .append('g')
 .attr('class', 'legend_pos');
@@ -211,7 +211,7 @@ legend_pos.append('rect')
 .attr('height', legendRectheight)
 
 .style('fill', function(d, i){
-  if(d.name == 'positive'){
+  if(d.name == 'Dream'){
     return pos_colors[i]
   }
 })
@@ -239,13 +239,13 @@ legends_pos.selectAll('.tick').style('color', 'black');
 // Legend for negative
 var legends_neg = d3.select("#posneg_chart").append("svg")
 .attr("width", 450)
-.attr("height",50)
+.attr("height", 35)
 .append("g")
 .attr("transform", "translate(" + margin.left + "," + 0 + ")");
 
 var legend_neg = legends_neg.selectAll('.legend')
 
-.data(total_data.filter(function(d){ return d.name == 'negative'; }))
+.data(total_data.filter(function(d){ return d.name == 'Nightmare'; }))
 .enter()
 .append('g')
 .attr('class', 'legend_neg')
@@ -260,7 +260,7 @@ legend_neg.append('rect')
 .attr('height', 20)
 .style('stroke-width', 2)
 .style('fill', function(d, i){
-  if(d.name == 'negative'){
+  if(d.name == 'Nightmare'){
     //console.log(neg_colors[i])
     return neg_colors[i]
   }

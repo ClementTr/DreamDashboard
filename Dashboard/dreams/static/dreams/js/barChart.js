@@ -1,18 +1,18 @@
 
-var data_bar = [{'word': 'Portugal', 'freq': 250},
-                {'word': 'is', 'freq': 220},
-                {'word': 'the', 'freq': 200},
-                {'word': 'European', 'freq': 123},
-                {'word': 'Champion', 'freq': 120},
-                {'word': 'France', 'freq': 100},
-                {'word': 'has', 'freq': 94},
-                {'word': 'lost', 'freq': 80},
-                {'word': 'in', 'freq': 20},
-                {'word': 'final', 'freq': 5}]
+var data_bar = [{'word': 'Cloud', 'freq': 250},
+                {'word': 'Pitt', 'freq': 220},
+                {'word': 'Gun', 'freq': 200},
+                {'word': 'Monkey', 'freq': 123},
+                {'word': 'Trophy', 'freq': 120},
+                {'word': 'Arsenal', 'freq': 100},
+                {'word': 'Car', 'freq': 94},
+                {'word': 'Fish', 'freq': 80},
+                {'word': 'Shoes', 'freq': 20},
+                {'word': 'Beer', 'freq': 5}]
 
 var margin_bar = {top: 20, right: 50, bottom: 70, left: 30},
     width_bar = 350 - margin_bar.left - margin_bar.right,
-    height_bar = 300 - margin_bar.top - margin_bar.bottom;
+    height_bar = 220 - margin_bar.top - margin_bar.bottom;
 
 
 var x_bar = d3.scale.ordinal().rangeRoundBands([0, width_bar], .05);
