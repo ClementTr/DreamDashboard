@@ -1,6 +1,6 @@
 
 var margin_posneg = {top: 20, right: 30, bottom: 20, left: 30},
-    width_posneg  = 350 - margin_posneg .left - margin_posneg .right,
+    width_posneg  = 400 - margin_posneg .left - margin_posneg .right,
     height_posneg  = 80 - margin_posneg .top - margin_posneg .bottom;
 
 var x_posneg  = d3.scale.linear()
@@ -96,10 +96,10 @@ for (var i = 0; i < posneg.length; i++){
 };
 
 // Domain of x axis
-x_posneg .domain([-100, 100]);
+x_posneg.domain([-100, 100]);
 
 //x.domain(d3.extent(total_data, function(total_data) { return total_data.value; })).nice();
-y_posneg .domain(total_data.map(function(total_data) { return ''; }));
+y_posneg.domain(total_data.map(function(total_data) { return ''; }));
 //y.domain([0, 0]);
 var neutral_value = total_data[5].value / 2
 
@@ -184,13 +184,14 @@ svg_posneg.append("g")
 
 
 // Legend
-var legendRectlength = 60;
+var legendRectlength = 40;
 var legendRectheight = 10;
 var legendSpacing = 4;
 
 var legends = d3.select("#posneg_second_chart").append("svg")
   .attr("width", width_posneg + margin_posneg.left + margin_posneg.right)
   .attr("height",25)
+  .style("padding-left", "39px")
   .append("g")
   .attr("transform", "translate(" + margin_posneg.left + "," + 0 + ")");
 
@@ -254,7 +255,7 @@ var legend_neg = legends.selectAll('.legend')
 
   legends.append("g")
       .attr("class", "axisLegend")
-      .attr("transform", "translate(" + 0 + "," + legendRectheight + ")")
+      .attr("transform", "translate(" + -legendRectlength + "," + legendRectheight + ")")
       .call(legendAxis)
       .style("color", 'white');
 
