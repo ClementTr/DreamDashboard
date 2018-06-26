@@ -48,15 +48,15 @@ svg_bar.append("g")
     .attr("dy", "-.55em")
     .attr("transform", "rotate(-90)" );
 
-svg_bar.append("g")
-    .attr("class", "y axis")
-    .call(yAxis_bar)
-  .append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 6)
-    .attr("dy", ".71em")
-    .style("text-anchor", "end")
-    .text("Value ($)");
+// svg_bar.append("g")
+//     .attr("class", "y axis")
+//     .call(yAxis_bar)
+//   .append("text")
+//     .attr("transform", "rotate(-90)")
+//     .attr("y", 6)
+//     .attr("dy", ".71em")
+//     .style("text-anchor", "end")
+//     .text("Value ($)");
 
 svg_bar.selectAll("bar")
     .data(data_bar)

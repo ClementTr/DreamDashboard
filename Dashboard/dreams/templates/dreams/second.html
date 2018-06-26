@@ -158,18 +158,16 @@ d3v4.csv("{% static 'dreams/data/coord_2D.csv' %}").row( (d, i) => {
           .domain(d3v4.extent(rows,(row) => row.y_coord))
           .range([0, h]);
 
-      draw();
+      draw_tsne();
       draw_legend();
 });
-
-
 </script>
 
 <!-- INCEPTION CHART -->
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
-// d3v4 = d3
+d3v4 = d3;
 var path = [];
 var values_path = [];
 var history = [];
@@ -434,16 +432,20 @@ function seekAndFind(base, words, name) {
 
 }
 
+// window.d3 = null;
+// window.d3v4 = null;
+
+
 </script>
 
 
 <!-- BARCHART -->
-<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.js"></script>
 
-<script src="{% static 'dreams/js/barChart.js' %}"></script> -->
+<script src="{% static 'dreams/js/barChart.js' %}"></script>
 
 <!-- POSNEG CHART -->
-<!-- <script src="{% static 'dreams/js/posnegChartSecond.js' %}"></script> -->
+<script src="{% static 'dreams/js/posnegChartSecond.js' %}"></script>
 {% endblock d3js %}

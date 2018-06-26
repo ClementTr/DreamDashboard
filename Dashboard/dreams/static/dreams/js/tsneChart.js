@@ -1,4 +1,4 @@
-function draw() {
+function draw_tsne() {
 
 	svg.append("g")
 	 .selectAll("circle")
