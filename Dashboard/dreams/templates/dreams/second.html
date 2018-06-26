@@ -38,8 +38,8 @@
 
                 <div class="au-card m-b-30">
                     <div class="au-card-inner">
-                        <h3 class="title-2 m-b-40">Dreams map</h3>
-                        <div class="card-body" id="container_map"></div>
+                        <h3 class="title-2 m-b-40">Inception</h3>
+                        <div class="card-body" id="inception_chart"></div>
                     </div>
                 </div>
 
@@ -60,7 +60,7 @@
                 <div class="col-sm-12" style=" padding-left: 0px; padding-right: 0px;">
                   <div class="au-card m-b-30" style="padding-left: 20px;padding-bottom: 0px;padding-top: 15px;">
                       <div class="au-card-inner">
-                          <h3 class="title-2 m-b-40">Interaction words</h3>
+                          <h3 class="title-2 m-b-40">TSNE</h3>
                           <center>
                           <div class="chart-wrapper" id="tsne_chart"></div>
                           </center>
@@ -71,7 +71,7 @@
                 <div class="col-sm-12" style=" padding-left: 0px; padding-right: 0px;">
                   <div class="au-card m-b-30" style="padding-left: 20px;padding-bottom: 0px;padding-top: 15px;">
                       <div class="au-card-inner">
-                          <h3 class="title-2 m-b-40">Interaction words</h3>
+                          <h3 class="title-2 m-b-40">Dream or Nightmare ?</h3>
                           <div class="chart-wrapper" id="posneg_second_chart"></div>
                       </div>
                   </div>
@@ -86,6 +86,8 @@
         </div>
     </div>
 </div>
+
+
 {% endblock main %}
 
 {% block d3js %}
@@ -119,17 +121,6 @@ var tabeau_legendes = [{'type' : "Verb", 'color' : "#c300ff"},
           {'type' : "Other", 'color' : "#f4df41"},
           {'type' : "Adjective", 'color' : "#0008ff"},
           {'type' : "Proper Noun", 'color' : "#702e2e"}]
-
-// var tooltip = d3v4.select("#tsne_chart")
-//         .append("div")
-//         .style("position", "absolute")
-//         .style("z-index", "10")
-//         .style("visibility", "hidden")
-//         .style("opacity", "0.8")
-//         .style("padding","10px")
-//         .style("border-radius","2px")
-//         .style("background-color", "black")
-//         .style("color", "white");
 
 let tooltip_tsne = d3v4.select("#tsne_chart").append("div").attr("class", "toolTip");
 
@@ -171,74 +162,288 @@ d3v4.csv("{% static 'dreams/data/coord_2D.csv' %}").row( (d, i) => {
       draw_legend();
 });
 
+
+</script>
+
+<!-- INCEPTION CHART -->
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+// d3v4 = d3
+var path = [];
+var values_path = [];
+var history = [];
+
+let complement = {};
+
+// 1- afficher les fils
+// 2- zoomer
+// 3- effacer les parents
+
+
+var svg_inception = d3v4.select("#inception_chart")
+                .append("svg")
+                .attr("width", 400)
+                .attr("height", 400)
+
+
+// var svg_inception = d3.select("svg"),
+var margin = 20,
+    diameter = +svg_inception.attr("width"),
+    g = svg_inception.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+
+var color = d3v4.scaleLinear()
+    .domain([-1, 5])
+    .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+    .interpolate(d3v4.interpolateHcl);
+
+var pack = d3v4.pack()
+    .size([diameter - margin, diameter - margin])
+    .padding(2);
+
+d3v4.json("/static/dreams/data/root.json", function(error, data) {
+  if (error) throw error;
+
+  console.log(JSON.stringify(data))
+
+  draw(data, [], data);
+
+});
+
+function erase() {
+    console.log("erase");
+    var circle = g.selectAll("*").remove();
+}
+
+function draw(base, words, subset) {
+  console.log("draw", subset);
+
+  var node, circle, text, focus, nodes, view;
+
+  root = d3v4.hierarchy(subset)
+      .sum(function(d) { return d.size; })
+      .sort(function(a, b) { return b.value - a.value; });
+
+
+  focus = root,
+  nodes = pack(root).descendants();
+  console.log("nodes", nodes)
+
+  circle = g.selectAll("circle")
+    .data(nodes)
+    .enter().append("circle")
+      // .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
+      .attr("class", function(d) { return "node"; })
+      .style("fill", function(d) { console.log(d.children); return d.children ? '#FFF' : null; })
+      .on("click", function(d) { seekAndFind(base, words, d.data.name); if (focus !== d) zoom(d), d3v4.event.stopPropagation(); });
+
+  text = g.selectAll("text")
+    .data(nodes)
+    .enter().append("text")
+      .attr("class", "label")
+      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
+      // .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
+      .text(function(d) { return d.data.name; });
+
+  node = g.selectAll("circle,text");
+
+  svg_inception.style("background", '#FFF')
+      .on("click", function() { seekAndFind(base, words, values_path[values_path.length-1]); });
+
+  zoomTo([root.x, root.y, root.r * 2 + margin]);
+
+  function zoomTo(v) {
+    var k = diameter / v[2]; view = v;
+    node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+    circle.attr("r", function(d) { return d.r * k; });
+  }
+
+  function zoom(d) {
+    var focus0 = focus; focus = d;
+
+    var transition = d3v4.transition()
+        .duration(d3v4.event.altKey ? 7500 : 750)
+        .tween("zoom", function(d) {
+          var i = d3v4.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+          return function(t) { zoomTo(i(t)); };
+        });
+
+    transition.selectAll("text")
+      .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+        .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
+        .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+        .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+  }
+
+}
+
+function load_author(base, words, name) {
+  console.log("load author", name, base);
+
+  d3v4.json(name, function(error, data){
+
+    base.children[path[0]].children = data.children[0].children;
+
+    data.children[0].children = data.children[0].children.map(function(group) {
+        return {
+          name: group.name,
+          children: [],
+          size: group.size
+        }
+    });
+
+    erase();
+    draw(base, words, data.children[0]);
+
+  })
+
+};
+
+function load_words(base, words, name, i) {
+  console.log("load words", name, base);
+
+  d3v4.json('/static/dreams/data/words_0.json', function(error, data){
+
+    words = words.concat(data);
+
+    tmp = words.findIndex(function(children){ return children.name == name });
+
+    if(tmp === -1){
+      if(i<2){
+        i+=1;
+        load_words(base, words, name, i);
+        tmp = words.findIndex(function(children){ return children.name == name });
+      };
+    };
+    path[2] = tmp;
+    values_path[i] = name;
+    erase();
+    draw(base, words, words[tmp]);
+
+  })
+
+};
+
+// function toTitleCase(str) {
+//     return str.replace(
+//         /\w\S*/g,
+//         function(txt) {
+//             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+//         }
+//     );
+// }
+
+function seekAndFind(base, words, name) {
+  console.log("seekAndFind", name, path);
+
+  subset = base;
+
+  if(typeof name === 'undefined') {
+    return;
+  }
+
+  if(name === values_path[path.length-1]) {
+    if(path.length < 3){
+      console.log("zoom out !");
+      path.pop()
+      values_path.pop()
+
+      for (var i = 0; i < path.length; i++) {
+        subset = subset.children[path[i]];
+      }
+
+      subset.children = subset.children.map(function(group) {
+          return {
+            name: group.name,
+            children: [],
+            size: group.size
+          }
+      });
+
+      erase();
+      draw(base, words, subset);
+      return;
+    // } else {
+    //   name = name.charAt(0).toUpperCase()+name.substr(1)
+    //   tmp = words.findIndex(function(children){ return children.name == name });
+    //   if( tmp === -1){
+    //     load_words(base, words, name, 0);
+    //   }else{
+    //     path[2] = tmp;
+    //     values_path[i] = name;
+    //     erase();
+    //     draw(base, words, words[tmp]);
+    //     return;
+    //   };
+  };
+};
+
+  if( path.length === 2) {
+    // name = name.charAt(0).toUpperCase()+name.substr(1)
+    tmp = words.findIndex(function(children){ return children.name == name });
+    if( tmp === -1){
+      load_words(base, words, name, 0);
+    }else{
+      path[2] = tmp;
+      values_path[i] = name;
+      erase();
+      draw(base, words, words[tmp]);
+      return;
+    };
+  }
+
+
+
+  // if( path.length === 3 ) {
+  //   name = name.split(",");
+  //   path.pop();
+  //   values_path.pop();
+  //   path[0] = base.findIndex(function(children){ return children.name == name[0] });
+  //   values_path[0] = name[0];
+  //   subset = subset.children[path[0]]
+  //   if( subset.children.length == 0) {
+  //     name = name.replace(/\W/g,'');
+  //     name = "data/dreams_"+name+".json";
+  //     load_author_get_dream(base, words, name);
+  //   }
+  //   path[1] = base.findIndex(function(children){ return children.name == name[1] });
+  //   values_path[1] = name[1];
+  //   subset = subset.children[path[1]]
+  //   erase();
+  //   draw(base, words, subset);
+  //   return;
+  // }
+
+
+  for (var i = 0; i < path.length; i++) {
+    subset = subset.children[path[i]];
+  }
+
+  values_path[i] = name;
+  path[i] = subset.children.findIndex(function(children){ return children.name == name });
+  // base = base.children[path[i]];
+
+  if( subset.children[path[i]].children.length == 0) {
+    name = name.replace(/\W/g,'');
+    name = "/static/dreams/data/dreams_"+name+".json";
+    load_author(base, words, name);
+  }
+
+  erase();
+  draw(base, words, subset.children[path[i]]);
+
+}
+
 </script>
 
 
 <!-- BARCHART -->
-<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.js"></script>
 
-<script src="{% static 'dreams/js/barChart.js' %}"></script>
+<script src="{% static 'dreams/js/barChart.js' %}"></script> -->
 
 <!-- POSNEG CHART -->
-<script src="{% static 'dreams/js/posnegChartSecond.js' %}"></script>
-
-<!---->
-<script>
-    d3.json("/static/dreams/data/data_map.json", function(error, myData) {
-
-      let dataset = {};
-
-      let onlyValues = myData.map(function(obj){ return obj[1]; });
-      let minValue = Math.min.apply(null, onlyValues),
-              maxValue = Math.max.apply(null, onlyValues);
-
-      // create color palette function
-      // color can be whatever you wish
-      let paletteScale = d3.scale.linear()
-              .domain([minValue,maxValue])
-              .range(["#EFEFFF","#02386F"]); // blue color
-
-      // fill dataset in appropriate format
-      myData.forEach(function(item){ //
-          // item example value ["USA", 70]
-          let iso = item[0],
-                  value = item[1];
-          dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
-
-      });
-
-      // render map
-      let map = new Datamap({
-          element: document.getElementById('container_map'),
-          projection: 'mercator', // big world map
-          responsive: true,
-          fills: { defaultFill: '#F5F5F5' },
-          data: dataset,
-          geographyConfig: {
-              borderColor: '#DEDEDE',
-              highlightBorderWidth: 2,
-              // don't change color on mouse hover
-              highlightFillColor: function(geo) {
-                  return geo['fillColor'] || '#F5F5F5';
-              },
-              // only change border
-              highlightBorderColor: '#B7B7B7',
-              // show desired information in tooltip
-              popupTemplate: function(geo, data) {
-                  // don't show tooltip if country don't present in dataset
-                  if (!data) { return ; }
-                  // tooltip content
-                  return ['<div class="hoverinfo">',
-                      '<strong>', geo.properties.name, '</strong>',
-                      '<br>Count: <strong>', data.numberOfThings, '</strong>',
-                      '</div>'].join('');
-              }
-          }
-      });
-
-    });
-
-</script>
+<!-- <script src="{% static 'dreams/js/posnegChartSecond.js' %}"></script> -->
 {% endblock d3js %}
