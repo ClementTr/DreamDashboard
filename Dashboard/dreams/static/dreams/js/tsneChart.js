@@ -140,19 +140,36 @@ function make_word_bigger (d) {
 	}
 }
 
+// function set_color (d){
+// 	  d3v4.select(this)
+//     if (d.tag == "Noun") {
+//       return "#009b31"; // green
+//     } else if (d.tag == "Verb") {
+//       return "#392759"; // purple
+//     } else if (d.tag == "Adverb"){
+// 			return "A63446"; // rouge
+// 		} else if (d.tag == "Adjective"){
+// 			return "#6874E8"; // blue
+// 		} else if (d.tag == "Other"){
+// 			return "F7ACCF"
+// 		} else if (d.tag == "Proper Noun"){
+// 			return "#702e2e" // Proper
+// 		}
+// }
+
 function set_color (d){
-	  d3v4.select(this)
+	  d3.select(this)
     if (d.tag == "Noun") {
-      return "#009b31"; // green
+      return "#1982C4"; // Blue
     } else if (d.tag == "Verb") {
-      return "#392759"; // purple
+      return "#966CD1"; // purple
     } else if (d.tag == "Adverb"){
-			return "A63446"; // rouge
+			return "#FF595E"; // rouge
 		} else if (d.tag == "Adjective"){
-			return "#6874E8"; // blue
+			return "#8AC926"; // green
 		} else if (d.tag == "Other"){
-			return "F7ACCF"
+			return "#797c7a" // TO DO
 		} else if (d.tag == "Proper Noun"){
-			return "#702e2e" // Proper
+			return "#FFCA3A" // yellow
 		}
 }

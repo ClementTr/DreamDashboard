@@ -163,6 +163,16 @@ d3v4.csv("{% static 'dreams/data/coord_2D.csv' %}").row( (d, i) => {
 });
 </script>
 
+<!-- BARCHART -->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.js"></script>
+
+<script src="{% static 'dreams/js/barChart.js' %}"></script>
+
+<!-- POSNEG CHART -->
+<script src="{% static 'dreams/js/posnegChartSecond.js' %}"></script>
+
 <!-- INCEPTION CHART -->
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -174,6 +184,22 @@ var history = [];
 
 let complement = {};
 
+let posneg_colors = ['#FFA3A3', '#CF7A7A', '#A05151', '#712828', '#420000','#000','#A3F7D0', '#7AC9A4', '#519C79', '#286F4E', '#004223'];
+
+var posneg = [7, 21, 43, 89, 123, 21, 199, 120, 31, 20, 1];
+
+
+var data_bar = [{'word': 'Cloud', 'freq': 250},
+                {'word': 'Pitt', 'freq': 220},
+                {'word': 'Gun', 'freq': 200},
+                {'word': 'Monkey', 'freq': 123},
+                {'word': 'Trophy', 'freq': 120},
+                {'word': 'Arsenal', 'freq': 100},
+                {'word': 'Car', 'freq': 94},
+                {'word': 'Fish', 'freq': 80},
+                {'word': 'Shoes', 'freq': 20},
+                {'word': 'Beer', 'freq': 5}]
+
 // 1- afficher les fils
 // 2- zoomer
 // 3- effacer les parents
@@ -181,8 +207,8 @@ let complement = {};
 
 var svg_inception = d3v4.select("#inception_chart")
                 .append("svg")
-                .attr("width", 400)
-                .attr("height", 400)
+                .attr("width", 600)
+                .attr("height", 600)
 
 
 // var svg_inception = d3.select("svg"),
@@ -202,11 +228,30 @@ var pack = d3v4.pack()
 d3v4.json("/static/dreams/data/root.json", function(error, data) {
   if (error) throw error;
 
-  console.log(JSON.stringify(data))
+  // console.log(JSON.stringify(data))
 
+  draw_barchart(data_bar );
+  draw_posneg(posneg);
   draw(data, [], data);
 
 });
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+function dataBar_converter(data) {
+  var final = [];
+  for (var word in data) {
+    final.push({'word': word, 'freq': data[word]});
+  };
+  return final;
+}
 
 function erase() {
     console.log("erase");
@@ -215,6 +260,22 @@ function erase() {
 
 function draw(base, words, subset) {
   console.log("draw", subset);
+
+  new_bar_data = dataBar_converter(subset.data_bar);
+  if(new_bar_data.length > 0) {
+    data_bar = new_bar_data;
+    redraw_barchart(data_bar);
+  };
+
+  new_posneg = subset.posneg;
+  console.log('HHHEEEEYYYYY', new_posneg);
+  if(new_posneg != undefined) {
+    posneg = new_posneg;
+    redraw_posneg(posneg);
+  };
+
+
+  console.log("DATA BAR", subset.data_bar, dataBar_converter(subset.data_bar));
 
   var node, circle, text, focus, nodes, view;
 
@@ -225,14 +286,14 @@ function draw(base, words, subset) {
 
   focus = root,
   nodes = pack(root).descendants();
-  console.log("nodes", nodes)
+  // console.log("nodes", nodes)
 
   circle = g.selectAll("circle")
     .data(nodes)
     .enter().append("circle")
       // .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
       .attr("class", function(d) { return "node"; })
-      .style("fill", function(d) { console.log(d.children); return d.children ? '#FFF' : null; })
+      .style("fill", function(d) { return d.children ? '#FFF' : getRandomColor(); })
       .on("click", function(d) { seekAndFind(base, words, d.data.name); if (focus !== d) zoom(d), d3v4.event.stopPropagation(); });
 
   text = g.selectAll("text")
@@ -282,13 +343,20 @@ function load_author(base, words, name) {
 
     base.children[path[0]].children = data.children[0].children;
 
+    // data.children[0].children = data.children[0].children.map(function(group) {
+    //     return {
+    //       name: group.name,
+    //       children: [],
+    //       size: group.size
+    //     }
+    // });
+
     data.children[0].children = data.children[0].children.map(function(group) {
-        return {
-          name: group.name,
-          children: [],
-          size: group.size
-        }
+        return Object.assign({}, group, {
+          children: []
+        });
     });
+
 
     erase();
     draw(base, words, data.children[0]);
@@ -297,22 +365,45 @@ function load_author(base, words, name) {
 
 };
 
-function load_words(base, words, name, i) {
+
+function load_author_then_dream(base, words, name, dream) {
+  console.log("load author then dream", name, base);
+
+  d3v4.json(name, function(error, data){
+
+    base.children[path[0]].children = data.children[0].children;
+
+    seekAndFind(base, words, dream)
+
+  })
+
+};
+
+function load_words(base, words, name) {
   console.log("load words", name, base);
 
-  d3v4.json('/static/dreams/data/words_0.json', function(error, data){
+  let i;
+  if (name.charAt(0).match(/[0-9A-C]/)) {
+    console.log('fichier words 0');
+    i = 0;
+  } else if (name.charAt(0).match(/[D-J]/)) {
+    console.log('fichier words 1');
+    i = 1;
+  } else if (name.charAt(0).match(/[K-R]/)) {
+    console.log('fichier words 2');
+    i = 2;
+  } else if (name.charAt(0).match(/[S-Z]/)) {
+    console.log('fichier words 3');
+    i = 3;
+  };
+
+
+  d3v4.json('/static/dreams/data/words_'+i+'.json', function(error, data){
 
     words = words.concat(data);
 
     tmp = words.findIndex(function(children){ return children.name == name });
 
-    if(tmp === -1){
-      if(i<2){
-        i+=1;
-        load_words(base, words, name, i);
-        tmp = words.findIndex(function(children){ return children.name == name });
-      };
-    };
     path[2] = tmp;
     values_path[i] = name;
     erase();
@@ -321,15 +412,6 @@ function load_words(base, words, name, i) {
   })
 
 };
-
-// function toTitleCase(str) {
-//     return str.replace(
-//         /\w\S*/g,
-//         function(txt) {
-//             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-//         }
-//     );
-// }
 
 function seekAndFind(base, words, name) {
   console.log("seekAndFind", name, path);
@@ -341,7 +423,7 @@ function seekAndFind(base, words, name) {
   }
 
   if(name === values_path[path.length-1]) {
-    if(path.length < 3){
+    // if(path.length < 4){
       console.log("zoom out !");
       path.pop()
       values_path.pop()
@@ -350,44 +432,60 @@ function seekAndFind(base, words, name) {
         subset = subset.children[path[i]];
       }
 
+      // subset.children = subset.children.map(function(group) {
+      //     return {
+      //       name: group.name,
+      //       children: [],
+      //       size: group.size
+      //     }
+      // });
+
       subset.children = subset.children.map(function(group) {
-          return {
-            name: group.name,
-            children: [],
-            size: group.size
-          }
+          return Object.assign({}, group, {
+            children: []
+          });
       });
 
       erase();
       draw(base, words, subset);
       return;
-    // } else {
-    //   name = name.charAt(0).toUpperCase()+name.substr(1)
-    //   tmp = words.findIndex(function(children){ return children.name == name });
-    //   if( tmp === -1){
-    //     load_words(base, words, name, 0);
-    //   }else{
-    //     path[2] = tmp;
-    //     values_path[i] = name;
-    //     erase();
-    //     draw(base, words, words[tmp]);
-    //     return;
-    //   };
-  };
+  // } else {
+  //   load_words(base, words, name);
+  //   return
+  // };
 };
 
   if( path.length === 2) {
-    // name = name.charAt(0).toUpperCase()+name.substr(1)
     tmp = words.findIndex(function(children){ return children.name == name });
     if( tmp === -1){
-      load_words(base, words, name, 0);
+      load_words(base, words, name);
+      return;
     }else{
+      console.log('iznvoq')
       path[2] = tmp;
       values_path[i] = name;
       erase();
       draw(base, words, words[tmp]);
       return;
     };
+  } else if ( path.length === 3) {
+    path = []
+    values_path = []
+    author = name.split('_')[0]
+    dream = name.split('_')[1]
+    console.log(author, dream);
+    values_path[0] = author;
+    subset = base;
+    path[0] = subset.children.findIndex(function(children){ return children.name == author });
+    // seekAndFind(base, words, dream);
+    // return;
+    if( subset.children[path[0]].children.length == 0) {
+      author = author.replace(/\W/g,'');
+      author = "/static/dreams/data/dreams_"+author+".json";
+      load_author_then_dream(base, words, author, dream);
+      return;
+    }
+    name = dream;
   }
 
 
@@ -425,11 +523,12 @@ function seekAndFind(base, words, name) {
     name = name.replace(/\W/g,'');
     name = "/static/dreams/data/dreams_"+name+".json";
     load_author(base, words, name);
+    return;
   }
 
   erase();
   draw(base, words, subset.children[path[i]]);
-
+  return;
 }
 
 // window.d3 = null;
@@ -439,13 +538,10 @@ function seekAndFind(base, words, name) {
 </script>
 
 
-<!-- BARCHART -->
+
 <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.js"></script>
 
-<script src="{% static 'dreams/js/barChart.js' %}"></script>
 
-<!-- POSNEG CHART -->
-<script src="{% static 'dreams/js/posnegChartSecond.js' %}"></script>
 {% endblock d3js %}
